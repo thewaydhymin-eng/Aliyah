@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://thewaydhymin-eng.github.io/Aliyah/sitemap.xml
