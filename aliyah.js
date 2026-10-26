@@ -1,7 +1,7 @@
 /* The Way Derech · Aliyah of the Day loader.
    GoDaddy code (paste once):
    <div id="tw-aliyah-root"></div>
-   <script src="https://thewaydhymin-eng.github.io/aliyah/aliyah.js"></script>
+   <script src="https://thewaydhymin-eng.github.io/Aliyah/aliyah.js"></script>
    Weekly updates: edit the ALIYOT list in this file (or ask Claude). */
 (function(){
   var cur = document.currentScript;

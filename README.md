@@ -3,13 +3,13 @@
 Daily Aliyah (English and Afrikaans) for thewayderech.co.za, served with GitHub Pages.
 
 - `aliyah.js` holds the week's seven Aliyot and the display code. Each Aliyah appears on its own date (South African time).
-- `index.html` shows the block on its own page: https://thewaydhymin-eng.github.io/aliyah/
+- `index.html` shows the block on its own page: https://thewaydhymin-eng.github.io/Aliyah/
 
 ## GoDaddy code (paste once into an HTML section)
 
 ```html
 <div id="tw-aliyah-root"></div>
-<script src="https://thewaydhymin-eng.github.io/aliyah/aliyah.js"></script>
+<script src="https://thewaydhymin-eng.github.io/Aliyah/aliyah.js"></script>
 ```
 
 ## Each week
