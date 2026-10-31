@@ -1,15 +1,57 @@
 {
  "topics": [
-  {"id": "shabbat-calendar", "en": "Shabbat & Calendar", "af": "Shabbat & Kalender"},
-  {"id": "yeshua", "en": "Yeshua / Yahushua", "af": "Yeshua / Yahushua"},
-  {"id": "israel-identity", "en": "Israel & Identity", "af": "Israel & Identiteit"},
-  {"id": "origins", "en": "Origins of Traditions", "af": "Oorsprong van Tradisies"},
-  {"id": "context", "en": "Scripture in Context", "af": "Die Skrif in Konteks"},
-  {"id": "daily-walk", "en": "Daily Walk", "af": "Daaglikse Wandel"}
+  {
+   "id": "shabbat-calendar",
+   "en": "Shabbat & Calendar",
+   "af": "Shabbat & Kalender"
+  },
+  {
+   "id": "yeshua",
+   "en": "Yeshua / Yahushua",
+   "af": "Yeshua / Yahushua"
+  },
+  {
+   "id": "israel-identity",
+   "en": "Israel & Identity",
+   "af": "Israel & Identiteit"
+  },
+  {
+   "id": "origins",
+   "en": "Origins of Traditions",
+   "af": "Oorsprong van Tradisies"
+  },
+  {
+   "id": "context",
+   "en": "Scripture in Context",
+   "af": "Die Skrif in Konteks"
+  },
+  {
+   "id": "daily-walk",
+   "en": "Daily Walk",
+   "af": "Daaglikse Wandel"
+  }
  ],
  "studies": [
-  {"slug": "7th-day-shabbat", "title": "7th Day Shabbat", "topic": "shabbat-calendar", "lang": "en"},
-  {"slug": "who-is-israel", "title": "Who Is Israel?", "topic": "israel-identity", "lang": "en"},
-  {"slug": "roots-of-christmas", "title": "The Roots of Christmas", "topic": "origins", "lang": "en"}
+  {
+   "slug": "7th-day-shabbat",
+   "title": "7th Day Shabbat",
+   "topic": "shabbat-calendar",
+   "lang": "en",
+   "summary": "Which day is the seventh day? The Scriptures, the timing of Messiah’s death and resurrection, and the history of the calendar all point to the same answer."
+  },
+  {
+   "slug": "who-is-israel",
+   "title": "Who Is Israel?",
+   "topic": "israel-identity",
+   "lang": "en",
+   "summary": "In Scripture, Yisra’el is a people, a person and a land. A walk through the passages that define each, and why the land remains set apart to יהוה."
+  },
+  {
+   "slug": "roots-of-christmas",
+   "title": "The Roots of Christmas",
+   "topic": "origins",
+   "lang": "en",
+   "summary": "Where Christmas came from, what Scripture says about borrowing pagan customs, and what that means for those who follow Yeshua."
+  }
  ]
 }
