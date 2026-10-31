@@ -1,0 +1,15 @@
+{
+ "topics": [
+  {"id": "shabbat-calendar", "en": "Shabbat & Calendar", "af": "Shabbat & Kalender"},
+  {"id": "yeshua", "en": "Yeshua / Yahushua", "af": "Yeshua / Yahushua"},
+  {"id": "israel-identity", "en": "Israel & Identity", "af": "Israel & Identiteit"},
+  {"id": "origins", "en": "Origins of Traditions", "af": "Oorsprong van Tradisies"},
+  {"id": "context", "en": "Scripture in Context", "af": "Die Skrif in Konteks"},
+  {"id": "daily-walk", "en": "Daily Walk", "af": "Daaglikse Wandel"}
+ ],
+ "studies": [
+  {"slug": "7th-day-shabbat", "title": "7th Day Shabbat", "topic": "shabbat-calendar", "lang": "en"},
+  {"slug": "who-is-israel", "title": "Who Is Israel?", "topic": "israel-identity", "lang": "en"},
+  {"slug": "roots-of-christmas", "title": "The Roots of Christmas", "topic": "origins", "lang": "en"}
+ ]
+}

@@ -208,6 +208,7 @@ write('index.html', shell({ title: 'Aliyah of the Day · The Way Derech Ha Yasha
 
 // ---- 5. sitemap + robots ---------------------------------------------------
 const urls = [`${BASE}/`, `${BASE}/archive/`].concat(all.map(a => `${BASE}/${pagePath(a)}`));
+if (fs.existsSync('studies/_data/urls.json')) urls.push(...JSON.parse(fs.readFileSync('studies/_data/urls.json', 'utf8')));
 write('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
   urls.map(u => `  <url><loc>${u}</loc></url>`).join('\n') + `\n</urlset>\n`);
 write('robots.txt', `User-agent: *\nAllow: /\nSitemap: ${BASE}/sitemap.xml\n`);
