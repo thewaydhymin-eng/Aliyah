@@ -31,6 +31,21 @@ Daily Aliyah (English and Afrikaans) for thewayderech.co.za, published with GitH
 3. Optionally add image cards to `assets/cards/`.
 4. Run `node build.js`, commit and push.
 
+## Telegram
+
+Every morning (about 05:00 SAST) GitHub posts that day's Aliyah from `data/` to the Telegram channel: English first, then Afrikaans, with the day's image card on top.
+
+| Path | What it is |
+|---|---|
+| `tools/telegram.js` | Builds and sends the Telegram posts. |
+| `.github/workflows/telegram-connect.yml` | Run once to connect the channel. |
+| `.github/workflows/telegram-daily.yml` | The daily post. Change the time on the `cron:` line (UTC). |
+| `telegram/channel.json` | The connected channel (written by the connect workflow). |
+| `telegram/posted.json` | Days already posted, so nothing is posted twice. |
+
+The bot token is kept only as the GitHub secret `TELEGRAM_BOT_TOKEN`, never in this repo.
+To check a day's post without sending it: `ALIYAH_DATE=2026-11-08 node tools/telegram.js preview`.
+
 ## Own web address
 
 When `aliyah.thewayderech.co.za` is connected (DNS CNAME to `thewaydhymin-eng.github.io` and the custom domain set under Settings → Pages), change `base` in `config.json` to `https://aliyah.thewayderech.co.za`, add a `CNAME` file containing that address, and rebuild.

@@ -1,0 +1,36 @@
+name: Telegram – 2. Daily Aliyah
+# Posts today's Aliyah (English, then Afrikaans) every morning at about 05:00 South African time.
+# Scheduled times are in UTC: "7 3 * * *" = 03:07 UTC = 05:07 SAST. GitHub can start it 5–30 minutes late.
+# You can also post by hand: Actions tab → this workflow → Run workflow.
+on:
+  schedule:
+    - cron: "7 3 * * *"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Post again even if today was already posted"
+        type: boolean
+        default: false
+permissions:
+  contents: write
+concurrency: telegram
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Post today's Aliyah
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          FORCE: ${{ inputs.force || 'false' }}
+        run: node tools/telegram.js post
+      - name: Remember that today was posted
+        run: |
+          git config user.name "aliyah-bot"
+          git config user.email "aliyah-bot@users.noreply.github.com"
+          git add telegram/posted.json 2>/dev/null || exit 0
+          git commit -m "Telegram: posted $(TZ=Africa/Johannesburg date +%F)" || exit 0
+          git pull --rebase && git push

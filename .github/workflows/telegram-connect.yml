@@ -1,0 +1,26 @@
+name: Telegram – 1. Connect channel
+# Run this once (Actions tab → this workflow → Run workflow) after adding the bot to your channel as an admin.
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency: telegram
+jobs:
+  connect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Find the channel and send a test message
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        run: node tools/telegram.js setup
+      - name: Save the channel
+        run: |
+          git config user.name "aliyah-bot"
+          git config user.email "aliyah-bot@users.noreply.github.com"
+          git add telegram/channel.json
+          git commit -m "Connect Telegram channel" || exit 0
+          git pull --rebase && git push
