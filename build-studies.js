@@ -101,6 +101,7 @@ const verseNums = h => h
   .replace(/(^|[\s>“"(])(\d{1,3}(?:[-–]\d{1,3})?)(\s+)(?=[“"‘'(\[A-Z<])/g, (m, a, n) => `${a}<sup>${n}</sup>`)
   .replace(/([.,;:!?”’"–—]\s+)(\d{1,3})(\s+)(?=[a-z])/g, (m, a, n) => `${a}<sup>${n}</sup>`);
 
+const linkify = h => h.replace(/(^|[\s(>])(https?:\/\/[^\s<"]+)/g, (m, a, u) => `${a}<a href="${u}" rel="noopener">${u.length > 60 ? u.slice(0, 57) + '…' : u}</a>`);
 const studies = [];
 cat.studies.forEach(st => {
   const data = JSON.parse(fs.readFileSync(`studies/_data/${st.slug}.json`, 'utf8'));
@@ -118,8 +119,17 @@ studies.forEach(st => {
   const toc = [];
   let body = '', inQuote = false, inList = false, pendingRef = '';
   const flush = () => { if (inQuote) { body += '</blockquote>'; inQuote = false; } if (inList) { body += '</ul>'; inList = false; } };
+  const L = st.lang === 'af' ? { min: 'min leestyd', pages: '-bladsy studie', pdf: 'Laai PDF af', toc: 'Inhoud', more: 'Meer studies' } : { min: 'min read', pages: '-page study', pdf: 'Download PDF', toc: 'Contents', more: 'More studies' };
+  const norm = x => (x || '').toLowerCase().normalize('NFKD').replace(/[^a-z0-9\u0590-\u05ff]+/g, ' ').trim();
+  const titleN = norm(st.title);
+  const firstBody = st.blocks.findIndex(b => ['p', 'q', 'ref', 'li'].includes(b.t));
   st.blocks.forEach((b, i) => {
-    if (b.t === 'h1') return;
+    if (/^h[123]$/.test(b.t) && i < firstBody) {
+      const n = norm(b.text);
+      if (b.t === 'h1' || (n && titleN.includes(n))) return;
+    }
+    if (i === firstBody && b.t === 'p' && norm(b.text) === titleN) return;
+    if (b.t === 'h1') b = { ...b, t: 'h2' };
     if (b.t !== 'q' && inQuote) { body += '</blockquote>'; inQuote = false; }
     if (b.t !== 'li' && inList) { body += '</ul>'; inList = false; }
     if (b.t !== 'q' && b.t !== 'ref' && pendingRef) { body += `<p class="hl" style="font:600 13px var(--ui);letter-spacing:.12em;text-transform:uppercase;color:var(--gold)">${esc(pendingRef)}</p>`; pendingRef = ''; }
@@ -131,23 +141,23 @@ studies.forEach(st => {
     }
     else if (b.t === 'li') { if (!inList) { body += '<ul>'; inList = true; } body += `<li>${b.html}</li>`; }
     else if (b.t === 'img') body += `<figure><img src="${b.src}" alt="" loading="lazy" width="${Math.round(b.w)}" height="${Math.round(b.h)}"></figure>`;
-    else if (b.t === 'p') body += `<p>${b.html}</p>`;
+    else if (b.t === 'p') body += `<p>${linkify(b.html)}</p>`;
   });
   flush();
   if (pendingRef) body += `<p class="hl">${esc(pendingRef)}</p>`;
   const tocList = toc.filter(t => t.lvl === 'h2').length >= 3 ? toc.filter(t => t.lvl === 'h2') : toc;
   const tocLinks = tocList.map(t => `<a href="#${t.id}">${esc(t.text)}</a>`).join('');
   const hasToc = tocList.length >= 3;
-  const others = studies.filter(s => s.slug !== st.slug).slice(0, 3);
+  const others = [...studies.filter(s => s.slug !== st.slug && s.topic === st.topic), ...studies.filter(s => s.topic !== st.topic)].slice(0, 3);
   const hero = `<header class="hero"><div class="eyebrow"><span><a href="${BASE}/studies/">Diverse Studies</a></span><span><a href="${BASE}/studies/#${st.topic}">${esc(topicName(st.topic))}</a></span></div>
 <h1>${esc(st.title)}</h1>${st.summary ? `<p class="dek">${esc(st.summary)}</p>` : ''}
-<div class="meta"><span>${st.minutes} min read</span><span>${st.pages}-page study</span><a class="btn" href="${st.slug}.pdf" download>Download PDF</a></div></header>`;
+<div class="meta"><span>${st.minutes} ${L.min}</span><span>${st.pages}${L.pages}</span><a class="btn" href="${st.slug}.pdf" download>${L.pdf}</a></div></header>`;
   const main = `<div class="w"><div class="layout"><article>
-${hasToc ? `<details class="toc-m"><summary>Contents</summary><nav class="toc">${tocLinks}</nav></details>` : ''}
+${hasToc ? `<details class="toc-m"><summary>${L.toc}</summary><nav class="toc">${tocLinks}</nav></details>` : ''}
 ${body}
 <div class="endnote"><span>${esc(st.title)} · The Way Derech Ha Yashar</span><a class="btn" href="${st.slug}.pdf" download>Download the PDF</a></div></article>
-${hasToc ? `<aside class="rail" aria-label="Contents"><nav><b>Contents</b><div class="toc" id="toc">${tocLinks}</div></nav></aside>` : '<aside class="rail"></aside>'}</div></div>
-${others.length ? `<section class="more"><div class="w"><h2>More studies</h2><div class="cards">${others.map(card).join('')}</div></div></section>` : ''}
+${hasToc ? `<aside class="rail" aria-label="${L.toc}"><nav><b>${L.toc}</b><div class="toc" id="toc">${tocLinks}</div></nav></aside>` : '<aside class="rail"></aside>'}</div></div>
+${others.length ? `<section class="more"><div class="w"><h2>${L.more}</h2><div class="cards">${others.map(card).join('')}</div></div></section>` : ''}
 <script>(function(){var l=[].slice.call(document.querySelectorAll('#toc a'));if(!l.length)return;var h=l.map(function(a){return document.getElementById(a.getAttribute('href').slice(1))});
 function s(){var c=0;for(var i=0;i<h.length;i++){if(h[i]&&h[i].getBoundingClientRect().top<120)c=i}l.forEach(function(a,i){a.classList.toggle('on',i===c)})}addEventListener('scroll',s,{passive:true});s();
 document.querySelectorAll('.toc-m a').forEach(function(a){a.addEventListener('click',function(){a.closest('details').open=false})})})();</script>`;
