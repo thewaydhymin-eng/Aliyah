@@ -1,0 +1,22 @@
+name: Telegram – 3. Change bot name
+# Changes the name shown on the bot's posts. Actions tab → this workflow → Run workflow → type the name.
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: "The name members will see on each post"
+        required: true
+        default: "The Way Derech Ha Yashar"
+jobs:
+  rename:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Change the name
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          BOT_NAME: ${{ inputs.name }}
+        run: node tools/telegram.js rename

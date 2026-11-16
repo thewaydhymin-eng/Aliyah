@@ -174,8 +174,17 @@ async function post(dry) {
   console.log(`Posted ${a.parashah} Aliyah ${a.aliyah} (${parts.length} messages) to ${ch.title}.`);
 }
 
+async function rename() {
+  const name = (process.env.BOT_NAME || '').trim();
+  if (!name) throw new Error('Type the new name in the box.');
+  await api('setMyName', { name });
+  const me = await api('getMyName', {});
+  console.log(`The bot's name is now: ${me.name}`);
+}
+
 (async () => {
   if (MODE === 'setup') await setup();
+  else if (MODE === 'rename') await rename();
   else if (MODE === 'post') await post(false);
   else await post(true);
 })().catch(e => { console.error('ERROR: ' + e.message); process.exit(1); });
