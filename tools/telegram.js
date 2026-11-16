@@ -146,7 +146,7 @@ async function setup() {
     throw new Error(`@${me.username} is an admin of the channel but "Post Messages" is off. Switch it on and run this again.`);
   }
   writeJSON(CHANNEL_FILE, { chat_id: chat.id, title: chat.title, type: chat.type, bot: me.username, saved: DATE });
-  await send(chat.id, '✅ <b>The Way Derech</b> bot is connected. The Aliyah of the Day will be posted here every morning.\n\n<i>(You can delete this test message.)</i>');
+  await send(chat.id, '✅ <b>The Way Derech</b> bot is connected. The Aliyah of the Day will be posted here every day just after midnight, when it appears on the website.\n\n<i>(You can delete this test message.)</i>');
   console.log(`Saved "${chat.title}" and sent a test message there.`);
 }
 

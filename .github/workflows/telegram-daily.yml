@@ -1,10 +1,14 @@
 name: Telegram – 2. Daily Aliyah
-# Posts today's Aliyah (English, then Afrikaans) every morning at about 05:00 South African time.
-# Scheduled times are in UTC: "7 3 * * *" = 03:07 UTC = 05:07 SAST. GitHub can start it 5–30 minutes late.
+# Posts the new Aliyah (English, then Afrikaans) just after midnight South African time,
+# when the website switches to the new day's Aliyah.
+# Scheduled times are in UTC: "1 22 * * *" = 22:01 UTC = 00:01 SAST.
+# GitHub sometimes starts scheduled runs late, so a back-up run at 02:31 SAST catches a missed post.
+# It never posts twice: telegram/posted.json records each day that was posted.
 # You can also post by hand: Actions tab → this workflow → Run workflow.
 on:
   schedule:
-    - cron: "7 3 * * *"
+    - cron: "1 22 * * *"
+    - cron: "31 0 * * *"
   workflow_dispatch:
     inputs:
       force:
