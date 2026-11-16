@@ -1,7 +1,7 @@
 // Telegram poster for the Aliyah of the Day.
 // Run by the GitHub workflows in .github/workflows/ — you never need to run it yourself.
 //
-//   node tools/telegram.js setup     find the channel the bot was added to, save it, send a test message
+//   node tools/telegram.js setup     find the group/channel the bot was added to, save it, send a test message
 //   node tools/telegram.js post      post today's Aliyah (English, then Afrikaans) once per day
 //   node tools/telegram.js preview   print today's posts without sending (no token needed)
 //
@@ -93,23 +93,58 @@ async function send(chatId, text, card) {
 }
 
 // ---- modes ----------------------------------------------------------------
+// Works for a group, supergroup or channel. Two ways to find it:
+//  1. automatic: the bot looks at what it saw in the last 24 hours (being added, or "/start@BotName" sent in the group)
+//  2. by hand: the workflow's "group" box gets the group's @username or numeric id (e.g. -1001234567890)
 async function setup() {
   const me = await api('getMe');
-  console.log(`Bot found: @${me.username}`);
-  const ups = await api('getUpdates', { allowed_updates: ['my_chat_member', 'channel_post', 'message'] });
-  const chats = new Map();
-  for (const u of ups) {
-    const m = u.my_chat_member;
-    if (m && ['administrator', 'member'].includes(m.new_chat_member.status)) chats.set(m.chat.id, m.chat);
-    const p = u.channel_post || u.message;
-    if (p && p.chat && p.chat.type !== 'private') chats.set(p.chat.id, p.chat);
+  console.log(`Bot found: @${me.username} (name: ${me.first_name})`);
+  // A webhook left over from another tool blocks getUpdates, so clear it (pending updates are kept).
+  await api('deleteWebhook', { drop_pending_updates: false });
+
+  let chat = null;
+  const manual = (process.env.TELEGRAM_GROUP || '').trim();
+  if (manual) {
+    console.log(`Looking up the group you typed: ${manual}`);
+    chat = await api('getChat', { chat_id: /^-?\d+$/.test(manual) ? Number(manual) : manual });
+  } else {
+    const ups = await api('getUpdates', { allowed_updates: ['message', 'channel_post', 'my_chat_member'] });
+    console.log(`Updates the bot can see from the last 24 hours: ${ups.length}`);
+    const chats = new Map();
+    const moved = new Map();
+    for (const u of ups) {
+      const m = u.my_chat_member;
+      if (m) {
+        console.log(`  - bot status in "${m.chat.title}" changed to: ${m.new_chat_member.status}`);
+        if (['administrator', 'member'].includes(m.new_chat_member.status)) chats.set(m.chat.id, m.chat);
+        else chats.delete(m.chat.id);
+      }
+      const p = u.channel_post || u.message;
+      if (p && p.chat && p.chat.type !== 'private') {
+        if (p.migrate_to_chat_id) moved.set(p.chat.id, p.migrate_to_chat_id);
+        chats.set(p.chat.id, p.chat);
+        console.log(`  - message seen in "${p.chat.title}" (${p.chat.type})`);
+      }
+      if (p && p.chat && p.chat.type === 'private') console.log(`  - private message from ${p.from && p.from.first_name} (ignored)`);
+    }
+    // A small group that became a supergroup gets a new id; use the new one.
+    for (const [from, to] of moved) { chats.delete(from); chats.set(to, await api('getChat', { chat_id: to })); }
+    if (!chats.size) {
+      throw new Error(`The bot can't see your group yet. In the group, check that @${me.username} (exactly this name) is an Administrator, then send the message /start@${me.username} in the group and run this again within 24 hours.`);
+    }
+    const list = [...chats.values()];
+    list.forEach(c => console.log(`Found: "${c.title}" (${c.type}) id ${c.id}`));
+    chat = list.find(c => /derech/i.test(c.title || '')) || list[list.length - 1];
   }
-  if (!chats.size) {
-    throw new Error('No channel found yet. Check that the bot is an admin of your channel, then post any short message in the channel (e.g. "test") and run this setup again within 24 hours.');
+
+  const member = await api('getChatMember', { chat_id: chat.id, user_id: me.id });
+  console.log(`Bot's role in "${chat.title}": ${member.status}`);
+  if (!['administrator', 'creator', 'member'].includes(member.status)) {
+    throw new Error(`@${me.username} is not in "${chat.title}". Add it as an Administrator and run this again.`);
   }
-  const list = [...chats.values()];
-  list.forEach(c => console.log(`Found: ${c.title} (${c.type}) id ${c.id}`));
-  const chat = list[list.length - 1];
+  if (chat.type === 'channel' && !member.can_post_messages) {
+    throw new Error(`@${me.username} is an admin of the channel but "Post Messages" is off. Switch it on and run this again.`);
+  }
   writeJSON(CHANNEL_FILE, { chat_id: chat.id, title: chat.title, type: chat.type, bot: me.username, saved: DATE });
   await send(chat.id, '✅ <b>The Way Derech</b> bot is connected. The Aliyah of the Day will be posted here every morning.\n\n<i>(You can delete this test message.)</i>');
   console.log(`Saved "${chat.title}" and sent a test message there.`);
@@ -126,7 +161,7 @@ async function post(dry) {
     return;
   }
   const ch = readJSON(CHANNEL_FILE, null);
-  if (!ch) throw new Error('No channel saved yet. Run the "Telegram – 1. Connect channel" workflow first.');
+  if (!ch) { console.log('Telegram is not connected yet, so nothing was posted. Run "Telegram – 1. Connect group" first.'); return; }
   const posted = readJSON(POSTED_FILE, {});
   if (posted[DATE] && !FORCE) { console.log(`Already posted for ${DATE}. Skipping.`); return; }
   for (let i = 0; i < parts.length; i++) {

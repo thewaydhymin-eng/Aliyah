@@ -1,7 +1,13 @@
-name: Telegram – 1. Connect channel
-# Run this once (Actions tab → this workflow → Run workflow) after adding the bot to your channel as an admin.
+name: Telegram – 1. Connect group
+# Run this once (Actions tab → this workflow → Run workflow) after making the bot an admin of your group
+# and sending /start@YourBotName in the group. Leave the box empty to find the group automatically.
 on:
   workflow_dispatch:
+    inputs:
+      group:
+        description: "Optional: the group's @username or id (leave empty to find it automatically)"
+        required: false
+        default: ""
 permissions:
   contents: write
 concurrency: telegram
@@ -13,14 +19,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Find the channel and send a test message
+      - name: Find the group and send a test message
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_GROUP: ${{ inputs.group }}
         run: node tools/telegram.js setup
-      - name: Save the channel
+      - name: Save the group
         run: |
           git config user.name "aliyah-bot"
           git config user.email "aliyah-bot@users.noreply.github.com"
           git add telegram/channel.json
-          git commit -m "Connect Telegram channel" || exit 0
+          git commit -m "Connect Telegram group" || exit 0
           git pull --rebase && git push
