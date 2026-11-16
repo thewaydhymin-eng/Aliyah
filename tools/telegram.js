@@ -20,6 +20,7 @@ const SITE = 'https://thewayderech.co.za/aliyah-a-day';
 const CHANNEL_FILE = 'telegram/channel.json';
 const POSTED_FILE = 'telegram/posted.json';
 const LIMIT = 4096;
+const QUESTIONS = 2; // how many questions go into the Telegram post (the website shows all of them)
 
 const L = {
   en: { ord: ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th'], act: 'Action', aod: 'Action Step of the Day', full: 'Full Aliyah' },
@@ -57,7 +58,7 @@ function build(a, lang) {
     `Parashat ${esc(a.parashah)} · ${t.ord[a.aliyah - 1]} Aliyah\n${esc(a.ref)}`,
     esc(c.summary),
   ].join('\n\n');
-  const qs = (c.questions || []).map((q, i) => {
+  const qs = (c.questions || []).slice(0, QUESTIONS).map((q, i) => {
     let s = `<b>${i + 1}. ${esc(q.q)}</b> (${esc(q.ref)})\n${esc(q.answer)}`;
     (q.key || []).forEach(k => { s += `\n<i>${esc(k)}</i>`; });
     if (q.action) s += `\n<b>${t.act}:</b> ${esc(q.action)}${q.detail ? ' ' + esc(q.detail) : ''}`;
