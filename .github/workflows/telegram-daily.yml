@@ -1,4 +1,4 @@
-name: Telegram – 2. Daily Aliyah
+name: Telegram – 2. Daily Aliyah (+ Facebook)
 # Posts the new Aliyah (English, then Afrikaans) just after midnight South African time,
 # when the website switches to the new day's Aliyah.
 # Scheduled times are in UTC: "1 22 * * *" = 22:01 UTC = 00:01 SAST.
@@ -31,10 +31,17 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           FORCE: ${{ inputs.force || 'false' }}
         run: node tools/telegram.js post
+      - name: Post today's Aliyah to the Facebook Page
+        if: always()
+        env:
+          FACEBOOK_PAGE_TOKEN: ${{ secrets.FACEBOOK_PAGE_TOKEN }}
+          FORCE: ${{ inputs.force || 'false' }}
+        run: node tools/facebook.js post
       - name: Remember that today was posted
+        if: always()
         run: |
           git config user.name "aliyah-bot"
           git config user.email "aliyah-bot@users.noreply.github.com"
-          git add telegram/posted.json 2>/dev/null || exit 0
-          git commit -m "Telegram: posted $(TZ=Africa/Johannesburg date +%F)" || exit 0
+          git add telegram/posted.json facebook/posted.json 2>/dev/null || true
+          git commit -m "Aliyah posted $(TZ=Africa/Johannesburg date +%F)" || exit 0
           git pull --rebase && git push

@@ -183,7 +183,9 @@ async function rename() {
   console.log(`The bot's name is now: ${me.name}`);
 }
 
-(async () => {
+module.exports = { todays, build, cardUrl, DATE, FORCE, readJSON, writeJSON };
+
+if (require.main === module) (async () => {
   if (MODE === 'setup') await setup();
   else if (MODE === 'rename') await rename();
   else if (MODE === 'post') await post(false);
