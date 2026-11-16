@@ -42,6 +42,6 @@ jobs:
         run: |
           git config user.name "aliyah-bot"
           git config user.email "aliyah-bot@users.noreply.github.com"
-          git add telegram/posted.json facebook/posted.json 2>/dev/null || true
+          for f in telegram/posted.json facebook/posted.json; do [ -f "$f" ] && git add "$f"; done
           git commit -m "Aliyah posted $(TZ=Africa/Johannesburg date +%F)" || exit 0
           git pull --rebase && git push
