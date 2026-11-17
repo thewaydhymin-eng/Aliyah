@@ -80,8 +80,10 @@ function build(a, lang) {
   return parts;
 }
 
-function cardUrl(a) {
-  const f = `assets/cards/${a.year}-${slugify(a.parashah)}-${a.aliyah}.jpg`;
+// English card: assets/cards/5787-vayetze-3.jpg   Afrikaans card: assets/cards/5787-vayetze-3-af.jpg
+// The Afrikaans post never borrows the English card: with no -af card it goes out without an image.
+function cardUrl(a, lang = 'en') {
+  const f = `assets/cards/${a.year}-${slugify(a.parashah)}-${a.aliyah}${lang === 'af' ? '-af' : ''}.jpg`;
   return fs.existsSync(f) ? `${BASE}/${f}` : null;
 }
 
@@ -155,9 +157,10 @@ async function post(dry) {
   const a = todays();
   if (!a) { console.log(`No Aliyah in data/ for ${DATE}. Nothing to post.`); return; }
   const parts = [...build(a, 'en'), ...build(a, 'af')];
-  const card = cardUrl(a);
+  const en = build(a, 'en').length;
+  const cards = { en: cardUrl(a, 'en'), af: cardUrl(a, 'af') };
   if (dry) {
-    console.log(`Date ${DATE} · card: ${card || 'none'}\n`);
+    console.log(`Date ${DATE} · English card: ${cards.en || 'none'} · Afrikaans card: ${cards.af || 'none'}\n`);
     parts.forEach((p, i) => console.log(`----- message ${i + 1} (${p.length} characters) -----\n${p}\n`));
     return;
   }
@@ -167,8 +170,8 @@ async function post(dry) {
   if (posted[DATE] && !FORCE) { console.log(`Already posted for ${DATE}. Skipping.`); return; }
   for (let i = 0; i < parts.length; i++) {
     // The card shows above the first English and the first Afrikaans message.
-    const first = i === 0 || i === build(a, 'en').length;
-    await send(ch.chat_id, parts[i], first ? card : null);
+    const card = i === 0 ? cards.en : i === en ? cards.af : null;
+    await send(ch.chat_id, parts[i], card);
   }
   posted[DATE] = `${a.parashah} ${a.aliyah}`;
   writeJSON(POSTED_FILE, posted);

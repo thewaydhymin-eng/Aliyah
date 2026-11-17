@@ -36,13 +36,12 @@ async function check() {
 async function post(dry) {
   const a = todays();
   if (!a) { console.log(`No Aliyah in data/ for ${DATE}. Nothing to post.`); return; }
-  const posts = ['en', 'af'].map(l => plain(build(a, l).join('\n\n')));
-  const card = cardUrl(a);
-  if (dry) { posts.forEach((p, i) => console.log(`----- Facebook post ${i + 1} (${p.length} characters) · card: ${card || 'none'} -----\n${p}\n`)); return; }
+  const posts = ['en', 'af'].map(l => ({ text: plain(build(a, l).join('\n\n')), card: cardUrl(a, l) }));
+  if (dry) { posts.forEach((p, i) => console.log(`----- Facebook post ${i + 1} (${p.text.length} characters) · card: ${p.card || 'none'} -----\n${p.text}\n`)); return; }
   if (!TOKEN) { console.log('Facebook is not connected yet (no FACEBOOK_PAGE_TOKEN secret), so nothing was posted.'); return; }
   const posted = readJSON(POSTED_FILE, {});
   if (posted[DATE] && !FORCE) { console.log(`Already posted to Facebook for ${DATE}. Skipping.`); return; }
-  for (const text of posts) {
+  for (const { text, card } of posts) {
     const r = card ? await graph('me/photos', { url: card, caption: text }) : await graph('me/feed', { message: text });
     console.log(`Posted: ${r.post_id || r.id}`);
   }
