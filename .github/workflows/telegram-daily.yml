@@ -2,13 +2,25 @@ name: Telegram – 2. Daily Aliyah (+ Facebook)
 # Posts the new Aliyah (English, then Afrikaans) just after midnight South African time,
 # when the website switches to the new day's Aliyah.
 # Scheduled times are in UTC: "1 22 * * *" = 22:01 UTC = 00:01 SAST.
-# GitHub sometimes starts scheduled runs late, so a back-up run at 02:31 SAST catches a missed post.
+# GitHub often starts scheduled runs hours late, so there are many tries between 00:01 and 03:31 SAST:
+# the first one GitHub actually starts posts, and the rest see it was posted and do nothing.
 # It never posts twice: telegram/posted.json records each day that was posted.
 # You can also post by hand: Actions tab → this workflow → Run workflow.
 on:
   schedule:
     - cron: "1 22 * * *"
+    - cron: "13 22 * * *"
+    - cron: "27 22 * * *"
+    - cron: "41 22 * * *"
+    - cron: "53 22 * * *"
+    - cron: "7 23 * * *"
+    - cron: "23 23 * * *"
+    - cron: "37 23 * * *"
+    - cron: "51 23 * * *"
+    - cron: "11 0 * * *"
     - cron: "31 0 * * *"
+    - cron: "57 0 * * *"
+    - cron: "31 1 * * *"
   workflow_dispatch:
     inputs:
       force:
@@ -33,6 +45,7 @@ jobs:
         run: node tools/telegram.js post
       - name: Post today's Aliyah to the Facebook Page
         if: always()
+        continue-on-error: true   # a Facebook problem must not mark the Telegram post as failed
         env:
           FACEBOOK_PAGE_TOKEN: ${{ secrets.FACEBOOK_PAGE_TOKEN }}
           FORCE: ${{ inputs.force || 'false' }}
